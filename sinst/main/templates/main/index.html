@@ -1,0 +1,22 @@
+{% extends 'main/layout.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+    <div class="features">
+        <h1>{{ title }}</h1>
+        {% if news %}
+            {% for new in news %}
+                <div class="alert alert-light">
+                    <a href="{% url 'user' new.user %}"><li>{{ new.user }}</li></a>
+                    <img src="{{ new.photo.url }}" alt="photo" width=615>
+                    <b>{{ new.title }}</b>
+                    <p>{{ new.date }}</p>
+                    <a href="{% url 'detail' new.id %}"><button class="btn btn-light">Подробнее</button></a>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>Новостей нет</p>
+        {% endif %}
+    </div>
+{% endblock %}

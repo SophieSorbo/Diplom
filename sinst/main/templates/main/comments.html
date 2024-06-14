@@ -1,0 +1,16 @@
+{% extends 'main/layout.html' %}
+
+{% block title %}{{ comments.news }}{% endblock %}
+
+{% block content %}
+    <div class="features">
+        <h1>{{ news.user }}</h1>
+        <div class="alert alert-light">
+            <strong>{{ news.user }}</strong>
+            <img src="{{ news.photo.url }}" alt="photo" width=415>
+            <b>{{ news.title }}</b>
+            <p>{{ news.date }}</p>
+            <p>{{ comments.text }}</p>
+        </div>
+    </div>
+{% endblock %}

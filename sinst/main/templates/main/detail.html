@@ -1,0 +1,19 @@
+{% extends 'main/layout.html' %}
+
+{% block title %}{{ news.user }}{% endblock %}
+
+{% block content %}
+    <div class="features">
+        <h1>{{ title }}</h1>
+        <div class="alert alert-light">
+            <strong>{{ news.user }}</strong>
+            <img src="{{ news.photo.url }}" alt="photo" width=615>
+            <b>{{ news.title }}</b>
+            <p>{{ news.date }}</p>
+            <a href="{% url 'comments' news.id %}" class="btn btn-light" type="submit">Комментировать</a>
+            <a href="{% url 'like' news.id %}" class="btn btn-primary" type="submit">Нравится</a>
+            <a href="{% url 'delete' news.id %}" class="btn btn-danger" type="submit">Удалить</a>
+            <a href="{% url 'update' news.id %}" class="btn btn-success" type="submit">Изменить</a>
+        </div>
+    </div>
+{% endblock %}
