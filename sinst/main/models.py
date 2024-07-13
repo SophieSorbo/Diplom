@@ -9,14 +9,13 @@ class News(models.Model):
 
 
     def __str__(self):
-        return f'{self.title}, {self.date}, {self.user}, {self.photo}, {self.comments}, {self.likes}'
+        return f'{self.title}, {self.date}, {self.user}, {self.photo}'
 
-    def get_absolute_url(self):
-        return f'/{self.id}'
 
     class Meta:
         verbose_name = 'Новость'
         verbose_name_plural = 'Новости'
+
 
 
 class Users(models.Model):
@@ -26,25 +25,30 @@ class Users(models.Model):
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
 
-class Likes(models.Model):
+
+
+class News_Like(models.Model):
+    news = models.ForeignKey(News, on_delete=models.CASCADE, blank=True, null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    is_liked = models.BooleanField(default=False)
+    likes = models.IntegerField(default=0, blank=True, null=True)
+
+
+class Comment(models.Model):
     news = models.ForeignKey(News, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    class Meta:
-        verbose_name = 'Лайк'
-        verbose_name_plural = 'Лайки'
+    comment = models.TextField(null=True, blank=True)
+    datetime = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f'{self.user}, {self.news}'
 
-class Comments(models.Model):
-    news = models.ForeignKey(News, on_delete=models.CASCADE)
+class Post(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    text = models.TextField(max_length=500)
-    date = models.DateTimeField(auto_now_add=True)
+    title = models.ForeignKey(News, on_delete=models.CASCADE, related_name='text')
+    photo = models.ForeignKey(News, on_delete=models.CASCADE, related_name='image')
+    date = models.ForeignKey(News, on_delete=models.CASCADE, related_name='created_at')
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name='comments', blank=True, null=True)
+    likes = models.ForeignKey(News_Like, on_delete=models.CASCADE, related_name='likes_count', blank=True, null=True)
 
     class Meta:
-        verbose_name = 'Комментарий'
-        verbose_name_plural = 'Комментарии'
-
-    def __str__(self):
-        return f'{self.user}, {self.news}, {self.text}, {self.date}'
+        verbose_name = 'Пост'
+        verbose_name_plural = 'Посты'

@@ -1,15 +1,17 @@
 from django.db.models import Model
 from django.shortcuts import render, redirect
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
-from .models import News, Comments, Likes
+from .models import News, Comment, News_Like, Post
 from .forms import NewsForm
-from django.views.generic import DetailView, UpdateView, DeleteView
 from rest_framework.viewsets import ModelViewSet, ViewSet
+from rest_framework.decorators import action
 
 from .permissions import IsOwnerOrReadOnly
-from .serializers import NewsSerializer, LikesSerializer, CommentsSerializer
+from .serializers import NewsSerializer, CommentSerializer, PostSerializer
 
+from django.urls import reverse
 
 
 
@@ -19,61 +21,39 @@ class NewsViewSet(ModelViewSet):
     filterset_fields = ['user', 'date']
     permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
 
+
+
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
-    def news(request):
-        news = News.objects.order_by('-date')[:8]
-        data = {'news': news, 'title': 'SInst'}
-        return render(request, 'main/index.html', data)
+    @action(detail=True, methods=['POST'])
+    def like(self, request, pk=None, is_liked=None):
+        new = self.get_object()
+        user = request.user
+        try:
+            like = News_Like.objects.get(news=new, user=user)
+            like.is_liked = not is_liked
+            like.save()
+            likes = News_Like.objects.filter(news=new, is_liked=True).count()
+            return Response({"message": f"New '{new.title}' liked. {likes} likes"}, status=200)
+        except News_Like.DoesNotExist:
+            News_Like.objects.create(news=new, user=user, is_liked=True)
+            return Response({"message": f"New '{new.title}' liked."}, status=200)
+
+    @action(detail=True, methods=['POST'])
+    def add_comment(self, request, pk=None):
+        new = self.get_object()
+        user = request.user
+        serializer = CommentSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(news=new, user=user)
+            return Response({"message": f"New '{new.title}' commented."}, status=200)
+        return Response({"error": serializer.errors}, status=400)
 
 
-class NewsDetailView(DetailView):
-    model = News
-    template_name = 'main/detail.html'
-    context_object_name = 'news'
 
-class NewsUpdateView(UpdateView):
-    model = News
-    template_name = 'main/update.html'
-    form_class = NewsForm
-
-class NewsDeleteView(DeleteView):
-    model = News
-    template_name = 'main/delete.html'
-    success_url = '/'
-
-def about(request):
-    return render(request, 'main/about.html')
-
-def create(request):
-    error = ''
-    if request.method == 'POST':
-        form = NewsForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('news')
-        else:
-            error = 'Форма была неверной'
-    form = NewsForm
-    data = {'form': form, 'error': error}
-    return render(request, 'main/create.html', data)
-
-
-class LikesViewSet(ModelViewSet):
-    queryset = Likes.objects.all()
-    serializer_class = LikesSerializer
-
-    def like(self, request, pk):
-        like = self.get_object()
-        return render(request, 'main/like.html', {'like': like})
-
-
-class CommentsViewSet(ModelViewSet):
-    queryset = Comments.objects.all()
-    serializer_class = CommentsSerializer
-
-    def comments(self, request, pk):
-        comments = self.get_object()
-        return render(request, 'main/comments.html', {'comments': comments})
-
+class PostViewSet(ModelViewSet):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+    filterset_fields = ['user', 'date']
+    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]

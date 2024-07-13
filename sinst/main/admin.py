@@ -1,8 +1,9 @@
 from django.contrib import admin
 
-from .models import News, Likes, Comments
+from .models import News, Users, Post
 
 admin.site.register(News)
-admin.site.register(Likes)
-admin.site.register(Comments)
+admin.site.register(Users)
+admin.site.register(Post)
+
 
