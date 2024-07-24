@@ -82,7 +82,7 @@ WSGI_APPLICATION = 'sinst.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'sinst_db',
+        'NAME': 'sinst_db0',
         'USER': 'postgres',
         'PASSWORD': '(LilBoPeep2017)',
         'HOST': 'localhost',

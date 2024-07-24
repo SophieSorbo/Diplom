@@ -1,15 +1,15 @@
 from django.db.models import Model
 from django.shortcuts import render, redirect
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
-from .models import News, Comment, News_Like, Post
+from .models import News, Comment, News_Like
 from .forms import NewsForm
 from rest_framework.viewsets import ModelViewSet, ViewSet
 from rest_framework.decorators import action
 
 from .permissions import IsOwnerOrReadOnly
-from .serializers import NewsSerializer, CommentSerializer, PostSerializer
+from .serializers import NewsSerializer, CommentSerializer
 
 from django.urls import reverse
 
@@ -19,7 +19,7 @@ class NewsViewSet(ModelViewSet):
     queryset = News.objects.all()
     serializer_class = NewsSerializer
     filterset_fields = ['user', 'date']
-    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
 
 
@@ -41,7 +41,7 @@ class NewsViewSet(ModelViewSet):
             return Response({"message": f"New '{new.title}' liked."}, status=200)
 
     @action(detail=True, methods=['POST'])
-    def add_comment(self, request, pk=None):
+    def comment(self, request, pk=None):
         new = self.get_object()
         user = request.user
         serializer = CommentSerializer(data=request.data)
@@ -52,8 +52,3 @@ class NewsViewSet(ModelViewSet):
 
 
 
-class PostViewSet(ModelViewSet):
-    queryset = Post.objects.all()
-    serializer_class = PostSerializer
-    filterset_fields = ['user', 'date']
-    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]

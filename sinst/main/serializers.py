@@ -1,21 +1,29 @@
 from rest_framework import serializers
-from .models import News, Comment, Post
+from .models import News, Comment, News_Like, Users
 
-class NewsSerializer(serializers.ModelSerializer):
+
+class UsersSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     class Meta:
-        model = News
+        model = Users
         fields = '__all__'
-        read_only_fields = ['user', 'date']
-
-
 
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = '__all__'
 
-class PostSerializer(serializers.ModelSerializer):
+class LikeSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Post
+        model = News_Like
         fields = '__all__'
 
+
+class NewsSerializer(serializers.ModelSerializer):
+    comment = CommentSerializer(read_only=True, many=True)
+    likes = LikeSerializer(read_only=True, many=True)
+    user = UsersSerializer(read_only=True)
+
+    class Meta:
+        model = News
+        fields = '__all__'
